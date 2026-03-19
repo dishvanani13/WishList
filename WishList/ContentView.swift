@@ -51,10 +51,12 @@ struct ContentView: View {
                 .alert("create a new Wish", isPresented: $isAlertShowing){
                     TextField("Enter a wish", text: $title)
                     Button {
-                        modelContext.insert(Wish(title: title))
-                        title = ""
+                        if title != "" {
+                            modelContext.insert(Wish(title: title))
+                            title = ""
+                        } 
                     } label: {
-                        Text("Save")
+                        Text("Add")
                     }
                 }
                 .overlay{
