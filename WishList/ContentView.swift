@@ -11,8 +11,10 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var wishes: [Wish]
+    //@Query(sort: \Wish.order) private var wishes: [Wish]
     @State private var isAlertShowing: Bool = false
     @State private var title: String = ""
+    //@State private var order : Int = 1
     
     var body: some View {
         NavigationStack{
@@ -23,9 +25,11 @@ struct ContentView: View {
                         .padding(.vertical,2)
                         .swipeActions {
                             Button("Delete", role: .destructive){
-                                modelContext.delete(wish)
+                                withAnimation {
+                                        modelContext.delete(wish)
+                                    }
+                                try? modelContext.save()
                             }
-                            
                         }
                 }
             }
@@ -52,12 +56,23 @@ struct ContentView: View {
                     TextField("Enter a wish", text: $title)
                     Button {
                         if title != "" {
-                            modelContext.insert(Wish(title: title))
+                           // let newOrder = (wishes.map { $0.order }.max() ?? 0) + 1
+                            withAnimation {
+                                modelContext.insert(Wish(title: title))
+                                
+                                       // modelContext.insert(Wish(title: title, order: newOrder))
+                                    }
+                            try? modelContext.save()
+                            
                             title = ""
-                        } 
+                            isAlertShowing = false
+                        }
                     } label: {
                         Text("Add")
                     }
+                }
+                .onChange(of: wishes.count) { oldValue, newValue in
+                    print("Updated count: \(newValue)")
                 }
                 .overlay{
                     if wishes.isEmpty {
@@ -69,10 +84,10 @@ struct ContentView: View {
 }
 #Preview("List with sample Data"){
     let container = try! ModelContainer(for: Wish.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    container.mainContext.insert(Wish(title: "Master SwiftData"))
+   // container.mainContext.insert(Wish(title: "Master SwiftData"))
     container.mainContext.insert(Wish(title: "Master SwiftUI"))
-    container.mainContext.insert(Wish(title: "Buy iPhone"))
-    container.mainContext.insert(Wish(title: "Every Day Practise"))
+    //container.mainContext.insert(Wish(title: "Buy iPhone", order: 1))
+   // container.mainContext.insert(Wish(title: "Every Day Practise", order: 4))
     return ContentView()
         .modelContainer(container)
 }

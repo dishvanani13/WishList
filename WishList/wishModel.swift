@@ -9,10 +9,16 @@ import Foundation
 import SwiftData
 
 @Model
-class Wish {
+class Wish: Identifiable {
+    
     var title: String
     
-    init(title: String) {
+   
+    
+    init(title: String){
+       
         self.title = title
+       
+       
     }
 }
